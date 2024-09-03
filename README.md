@@ -5,11 +5,11 @@
 <a href='https://huggingface.co/RED-AIGC/StoryMaker'><img src='https://img.shields.io/static/v1?label=Paper&message=Huggingface&color=orange'></a> 
 
 </div>
-
+StoryMaker is a personalization solution preserves not only the consistency of faces but also clothing, hairstyles and bodies in the multiple characters scene, enabling the potential to make a story consisting of a series of images.
 
 ## Demos
 
-### Single Portrait Synthesis
+### Story Generation
 
 <p align="center">
   <img src="assets/day1.png">
@@ -21,7 +21,7 @@
   <img src="assets/two.png">
 </p>
 
-### Diverse application
+### Diverse applications
 
 <p align="center">
   <img src="assets/diverse.png">
