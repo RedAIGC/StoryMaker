@@ -5,9 +5,8 @@ from PIL import Image
 from pillow_heif import register_heif_opener
 register_heif_opener()
 import pillow_heif
-pillow_heif.register_avif_opener()  #  support .avif image at 08.10
+pillow_heif.register_avif_opener()  
 from diffusers.utils import load_image
-from diffusers.models import ControlNetModel
 from diffusers import EulerAncestralDiscreteScheduler, UniPCMultistepScheduler
 
 from insightface.app import FaceAnalysis
@@ -38,14 +37,13 @@ def resize_img(input_image, max_side=1280, min_side=960, size=None,
 
 
 # Load face encoder
-app = FaceAnalysis(name='buffalo_l', root='/mnt/nlp-ali/usr/huaquan/code/github/controlnet_xl_xhs/', providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+app = FaceAnalysis(name='buffalo_l', root='./', providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
 app.prepare(ctx_id=0, det_size=(640, 640))
 
 # Path to models
-face_adapter = f'/mnt/nlp-ali/dataset/diffusion_train_dataset/zhouzhengguang/qs/pose_mp/xiezhen_new/unstable11_bs64_lr2e-5_no0.05_nvec4_loss_ignore0_drop01_r128_snr0_fl5_ip01new6_al70_123_cc5/checkpoint-7000/mask.bin'
-image_encoder_path = '/mnt/nlp-ali/dataset/diffusion_train_dataset/zhouzhengguang/data/models/vit/CLIP-ViT-H-14-laion2B-s32B-b79K'
-base_model_path = '/mnt/nlp-ali/dataset/diffusion_train_dataset/base_model/Unstable_Diffusers_V11_-_Diffusers'
-# base_model_path = '/mnt/nlp-ali/dataset/diffusion_train_dataset/base_model/stable-diffusion-xl-base-1.0'
+face_adapter = f'checkpoints/mask.bin'
+image_encoder_path = 'laion/CLIP-ViT-H-14-laion2B-s32B-b79K'   #  from https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K
+base_model_path = 'huaquan/YamerMIX_v11'  # from https://huggingface.co/huaquan/YamerMIX_v11
 
 pipe = StableDiffusionXLStoryMakerPipeline.from_pretrained(
     base_model_path,
@@ -141,6 +139,3 @@ if __name__ == "__main__":
 
     # two portrait generation
     # demo_two()
-
-    # swap cloth
-    # demo_swapcloth()
