@@ -1,6 +1,9 @@
 <div align="center">
 <h1>StoryMaker</h1>
 
+<img src='https://img.shields.io/badge/Technique-Report-red'></a>
+<a href='https://huggingface.co/RED-AIGC/StoryMaker'><img src='https://img.shields.io/static/v1?label=Paper&message=Huggingface&color=orange'></a> 
+
 </div>
 
 
@@ -64,8 +67,9 @@ app.prepare(ctx_id=0, det_size=(640, 640))
 
 # prepare models under ./checkpoints
 face_adapter = f'./checkpoints/mask.bin'
+image_encoder_path = 'laion/CLIP-ViT-H-14-laion2B-s32B-b79K'  #  from https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K
 
-base_model = 'huaquan/YamerMIX_v11'  # from https://civitai.com/models/84040?modelVersionId=309729
+base_model = 'huaquan/YamerMIX_v11'  # from https://huggingface.co/huaquan/YamerMIX_v11
 pipe = StableDiffusionXLStoryMakerPipeline.from_pretrained(
     base_model,
     torch_dtype=torch.float16
