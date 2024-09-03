@@ -1,27 +1,25 @@
 <div align="center">
-<h1>StoryMaker</h1>
+<h1>StoryMaker: Towards consistent characters in text-to-image generation</h1>
 
 <img src='https://img.shields.io/badge/Technique-Report-red'></a>
 <a href='https://huggingface.co/RED-AIGC/StoryMaker'><img src='https://img.shields.io/static/v1?label=Paper&message=Huggingface&color=orange'></a> 
 
 </div>
 StoryMaker is a personalization solution preserves not only the consistency of faces but also clothing, hairstyles and bodies in the multiple characters scene, enabling the potential to make a story consisting of a series of images.
+<p align="center">
+  <img src="assets/day1.png">
+  Visualization of generated images by StoryMaker. First three rows tell a story about a day in the life of a "office worker" and the last two rows tell a story about a movie of "Before Sunrise".
+</p>
 
 ## Demos
 
-### Story Generation
-
-<p align="center">
-  <img src="assets/day1.png">
-</p>
-
-### Two Portrait Synthesis
+### Two Portraits Synthesis
 
 <p align="center">
   <img src="assets/two.png">
 </p>
 
-### Diverse applications
+### Diverse application
 
 <p align="center">
   <img src="assets/diverse.png">
