@@ -11,6 +11,10 @@ StoryMaker is a personalization solution preserves not only the consistency of f
   Visualization of generated images by StoryMaker. First three rows tell a story about a day in the life of a "office worker" and the last two rows tell a story about a movie of "Before Sunrise".
 </p>
 
+## News
+- [2024/09/20] 🔥 We release the [technical report](https://arxiv.org/pdf/2409.12576).
+- [2024/09/02] 🔥 We release the [model weights](https://huggingface.co/RED-AIGC/StoryMaker).
+
 ## Demos
 
 ### Two Portraits Synthesis
