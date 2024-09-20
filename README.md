@@ -1,7 +1,7 @@
 <div align="center">
 <h1>StoryMaker: Towards consistent characters in text-to-image generation</h1>
 
-<img src='https://img.shields.io/badge/Technique-Report-red'></a>
+<a href='https://arxiv.org/pdf/2409.12576'><img src='https://img.shields.io/badge/Technique-Report-red'></a>
 <a href='https://huggingface.co/RED-AIGC/StoryMaker'><img src='https://img.shields.io/static/v1?label=Paper&message=Huggingface&color=orange'></a> 
 
 </div>
