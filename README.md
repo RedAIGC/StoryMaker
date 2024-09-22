@@ -61,6 +61,7 @@ import numpy as np
 from PIL import Image
 
 from insightface.app import FaceAnalysis
+from diffusers import UniPCMultistepScheduler
 from pipeline_sdxl_storymaker import StableDiffusionXLStoryMakerPipeline
 
 # prepare 'buffalo_l' under ./models
