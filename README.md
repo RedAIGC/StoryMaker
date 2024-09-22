@@ -80,7 +80,7 @@ pipe.cuda()
 
 # load adapter
 pipe.load_storymaker_adapter(image_encoder_path, face_adapter, scale=0.8, lora_scale=0.8)
-pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
+pipe.scheduler = diffusers.UniPCMultistepScheduler.from_config(pipe.scheduler.config)
 ```
 
 Then, you can customized your own images
