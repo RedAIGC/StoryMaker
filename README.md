@@ -91,7 +91,7 @@ Then, you can customized your own images
 face_image = Image.open("examples/ldh.png").convert('RGB')
 mask_image = Image.open("examples/ldh_mask.png").convert('RGB')
     
-face_info = app.get(cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR))
+face_info = app.get(cv2.cvtColor(np.array(face_image), cv2.COLOR_RGB2BGR))
 face_info = sorted(face_info, key=lambda x:(x['bbox'][2]-x['bbox'][0])*(x['bbox'][3]-x['bbox'][1]))[-1] # only use the maximum face
 
 prompt = "a person is taking a selfie, the person is wearing a red hat, and a volcano is in the distance"
@@ -100,7 +100,7 @@ n_prompt = "bad quality, NSFW, low quality, ugly, disfigured, deformed"
 generator = torch.Generator(device='cuda').manual_seed(666)
 for i in range(4):
     output = pipe(
-        image=image, mask_image=mask_image, face_info=face_info,
+        image=face_image, mask_image=mask_image, face_info=face_info,
         prompt=prompt,
         negative_prompt=n_prompt,
         ip_adapter_scale=0.8, lora_scale=0.8,
