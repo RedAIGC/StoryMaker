@@ -190,7 +190,7 @@ def parse_args():
     parser.add_argument(
         "--resolution",
         type=int,
-        default=512,
+        default=960,
         help=(
             "The resolution for input images"
         ),
@@ -215,22 +215,22 @@ def parse_args():
     )
     parser.add_argument("--weight_decay", type=float, default=1e-2, help="Weight decay to use.")
     parser.add_argument("--num_train_epochs", type=int, default=100)
-    parser.add_argument("--max_train_steps", type=int, default=5000)
-    parser.add_argument("--noise_offset", type=float, default=0, help="The scale of noise offset.")
+    parser.add_argument("--max_train_steps", type=int, default=100000)
+    parser.add_argument("--noise_offset", type=float, default=0.05, help="The scale of noise offset.")
     parser.add_argument(
-        "--train_batch_size", type=int, default=8, help="Batch size (per device) for the training dataloader."
+        "--train_batch_size", type=int, default=1, help="Batch size (per device) for the training dataloader."
     )
     parser.add_argument("--num_tokens", type=int, default=16)
     parser.add_argument(
         "--gradient_accumulation_steps",
         type=int,
-        default=1,
+        default=8,
         help="Number of updates steps to accumulate before performing a backward/update pass.",
     )
     parser.add_argument(
         "--dataloader_num_workers",
         type=int,
-        default=0,
+        default=8,
         help=(
             "Number of subprocesses to use for data loading. 0 means that the data will be loaded in the main process."
         ),
@@ -243,7 +243,7 @@ def parse_args():
             "Save a checkpoint of the training state every X updates"
         ),
     )
-    parser.add_argument("--bg_tokens", type=int, default=0)
+    parser.add_argument("--bg_tokens", type=int, default=20)
     parser.add_argument(
         "--ctrl_clipemb",
         type=int,
@@ -252,7 +252,7 @@ def parse_args():
     parser.add_argument(
         "--cropref",
         type=int,
-        default=0,
+        default=1,
     )
     parser.add_argument(
         "--hstack_ref",
@@ -270,19 +270,19 @@ def parse_args():
     parser.add_argument(
         "--use_faceid",
         type=int,
-        default=0,
+        default=4,
     )
     parser.add_argument(
         "--use_facekps",
         type=int,
-        default=0,
+        default=1,
     )
     parser.add_argument(
         "--use_headseg",
         type=int,
         default=0,
     )
-    parser.add_argument( "--faceid_loss", type=float, default=0, )
+    parser.add_argument( "--faceid_loss", type=float, default=0.1, )
     parser.add_argument( "--mse_loss", type=float, default=0, )
     parser.add_argument( "--use_unnorm", type=int, default=0, )
     parser.add_argument( "--add_anime", type=float, default=0, )
@@ -314,13 +314,13 @@ def parse_args():
         "--drop_prompt", type=float, default=0.2,
     )
     parser.add_argument(
-        "--ip_loss", type=float, default=0,
+        "--ip_loss", type=float, default=0.1,
     )
     parser.add_argument(
         "--ip_loss_only_person", type=int, default=0,
     )
     parser.add_argument(
-        "--mask_loss_weight", type=float, default=0,
+        "--mask_loss_weight", type=float, default=5,
     )
     parser.add_argument(
         "--mmdiff_clip_path", type=str, default=None,
@@ -648,10 +648,9 @@ def main():
         loss_ip = 0; res = []
         
         for i, attn in enumerate(attn_list):
-            if args.ip_loss_only_person:
-                attn_mask = attn/60
-                cur_loss = F.mse_loss(attn_mask.float(), mask_gt[:,:,:,i].float(), reduction="none")
-                loss_ip += cur_loss.sum()/max(mask_area, 1e-5)
+            attn_mask = attn/60
+            cur_loss = F.mse_loss(attn_mask.float(), mask_gt[:,:,:,i].float(), reduction="none")
+            loss_ip += cur_loss.sum()/max(mask_area, 1e-5)
             if  i==0:  # 顺便计算bg loss
                 attn_bg = attn_bg/60
                 cur_loss = F.mse_loss(attn_bg.float(), mask_bg.float(), reduction="mean")
@@ -665,11 +664,10 @@ def main():
                         img = img[:,:,::-1]
                         mask_img = tensor_2_numpy(mask_person.unsqueeze(1))
                         res.append(np.vstack([img, mask_img]))
-                        if args.invproj in [2,3,4,5,6]:
-                            mask = tensor_2_numpy(mask_bg.unsqueeze(1))
-                            attn = tensor_2_numpy(attn_bg.unsqueeze(1))
-                            res.append(np.vstack([mask, attn]))
-                            # pdb.set_trace()
+                        mask = tensor_2_numpy(mask_bg.unsqueeze(1))
+                        attn = tensor_2_numpy(attn_bg.unsqueeze(1))
+                        res.append(np.vstack([mask, attn]))
+                        # pdb.set_trace()
                     mask = tensor_2_numpy(mask_gt[:,:,:,i].unsqueeze(1))
                     attn = tensor_2_numpy(attn_mask.unsqueeze(1))
                     res.append(np.vstack([mask, attn]))
