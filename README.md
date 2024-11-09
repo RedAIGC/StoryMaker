@@ -12,6 +12,7 @@ StoryMaker is a personalization solution preserves not only the consistency of f
 </p>
 
 ## News
+- [2024/11/09] 🔥 We release the training code.
 - [2024/09/20] 🔥 We release the [technical report](https://arxiv.org/pdf/2409.12576).
 - [2024/09/02] 🔥 We release the [model weights](https://huggingface.co/RED-AIGC/StoryMaker).
 
