@@ -89,20 +89,30 @@ class faceid_plus(torch.nn.Module):
             dim=1280,  depth=4, dim_head=64, heads= 20, num_queries=16,
             embedding_dim=clip_embeddings_dim, output_dim=cross_attention_dim, ff_mult=4 )
         
-    def forward(self, id_embeds, clip_embeds, face_embeds):
+    def forward(self, id_embeds, clip_embeds, face_embeds, is_training=False):
         x = self.proj(id_embeds)
         x = x.reshape(-1, 4, self.cross_attention_dim)
         x = self.norm(x)
         out = self.perceiver_resampler(x, face_embeds)
         out = x + out
         clip = self.resample(clip_embeds)
-        
+        if is_training:
+            if random.random()<0.1:
+                out = out*0
+            if random.random()<0.1:
+                clip = clip*0
         B = clip_embeds.shape[0]
         cat = torch.cat([out, clip], dim=1)+self.pos_embed[:B]   #  B, 20, 2048
         res = self.norm_out(self.proj_out(cat))+cat
         bg_embed = torch.zeros_like(self.bg_embed) if id_embeds.sum().abs()<1e-2 else self.bg_embed
         res = torch.cat([self.bg_embed, res], dim=0)  # :20 is bg emb, 20:80 is 3 ip emb
         return res
+    
+    def load_model(self, dict_a, dict_b):
+        self.load_state_dict(dict_a, strict=False)
+        res = {f'resample.{x}':y for x, y in dict_b.items()}
+        self.load_state_dict(res, strict=False)
+
 
 class IPAdapterFaceID:
     def __init__(self, sd_pipe, ip_ckpt, device, lora_rank=128, num_tokens=4, torch_dtype=torch.float16):
