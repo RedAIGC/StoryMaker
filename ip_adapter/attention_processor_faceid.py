@@ -321,7 +321,7 @@ class LoRAIPAttnProcessor2_0(nn.Module):
             Equivalent to `alpha` but it's usage is specific to Kohya (A1111) style LoRAs.
     """
 
-    def __init__(self, hidden_size, cross_attention_dim=None, rank=4, network_alpha=None, lora_scale=1.0, scale=1.0, num_tokens=4):
+    def __init__(self, hidden_size, cross_attention_dim=None, rank=4, network_alpha=None, lora_scale=1.0, scale=1.0, num_tokens=4, ip_loss=0):
         super().__init__()
         
         self.rank = rank
@@ -337,6 +337,8 @@ class LoRAIPAttnProcessor2_0(nn.Module):
         self.hidden_size = hidden_size
         self.cross_attention_dim = cross_attention_dim
         self.scale = scale
+        self.ip_loss = ip_loss
+        self.attn_probs = 0
 
         self.to_k_ip = nn.Linear(cross_attention_dim or hidden_size, hidden_size, bias=False)
         self.to_v_ip = nn.Linear(cross_attention_dim or hidden_size, hidden_size, bias=False)
@@ -364,7 +366,9 @@ class LoRAIPAttnProcessor2_0(nn.Module):
             hidden_states = attn.group_norm(hidden_states.transpose(1, 2)).transpose(1, 2)
 
         query = attn.to_q(hidden_states) + self.lora_scale * self.to_q_lora(hidden_states)
-        
+        if self.ip_loss>0:
+            query2 = attn.head_to_batch_dim(query)
+
         if encoder_hidden_states is None:
             encoder_hidden_states = hidden_states
         else:
@@ -397,16 +401,29 @@ class LoRAIPAttnProcessor2_0(nn.Module):
         # for ip
         ip_key = self.to_k_ip(ip_hidden_states)
         ip_value = self.to_v_ip(ip_hidden_states)
+        if self.ip_loss>0:
+            ip_key = attn.head_to_batch_dim(ip_key)
+            ip_value = attn.head_to_batch_dim(ip_value)
             
-        ip_key = ip_key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
-        ip_value = ip_value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
-        # the output of sdp = (batch, num_heads, seq_len, head_dim)
-        # TODO: add support for attn.scale when we move to Torch 2.1
-        ip_hidden_states = F.scaled_dot_product_attention(
-            query, ip_key, ip_value, attn_mask=None, dropout_p=0.0, is_causal=False
-        )
-        ip_hidden_states = ip_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
-        ip_hidden_states = ip_hidden_states.to(query.dtype)
+            attention_probs = attn.get_attention_scores(query2, ip_key, attention_mask)
+
+            ip_hidden_states = torch.bmm(attention_probs, ip_value)
+            ip_hidden_states = attn.batch_to_head_dim(ip_hidden_states)
+            batch_size, seq_len, dim = attention_probs.shape
+            head_size = attn.heads
+            self.attn_probs = attn.batch_to_head_dim(attention_probs).reshape(batch_size // head_size, seq_len, head_size, dim).permute(0, 2, 3, 1)
+            self.attn_probs = self.attn_probs.float().mean(dim=1)
+        else:
+            
+            ip_key = ip_key.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
+            ip_value = ip_value.view(batch_size, -1, attn.heads, head_dim).transpose(1, 2)
+            # the output of sdp = (batch, num_heads, seq_len, head_dim)
+            # TODO: add support for attn.scale when we move to Torch 2.1
+            ip_hidden_states = F.scaled_dot_product_attention(
+                query, ip_key, ip_value, attn_mask=None, dropout_p=0.0, is_causal=False
+            )
+            ip_hidden_states = ip_hidden_states.transpose(1, 2).reshape(batch_size, -1, attn.heads * head_dim)
+            ip_hidden_states = ip_hidden_states.to(query.dtype)
         
         hidden_states = hidden_states + self.scale * ip_hidden_states
 
