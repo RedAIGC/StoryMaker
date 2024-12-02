@@ -681,7 +681,7 @@ def main():
         from arcface import face_align_torch
         from arcface import get_model
         facenet = get_model('r34', fp16=False)
-        arcface_path = '/mnt/nlp-ali/usr/huaquan/code/IP-Adapter/arcface/resnet34.pth'
+        arcface_path = './arcface/resnet34.pth'
         print(arcface_path)
         facenet.load_state_dict(torch.load(arcface_path))
         facenet.to(accelerator.device, dtype=torch.float32)
